@@ -1,0 +1,173 @@
+﻿body {
+    background-color: black;
+    background-image: url(../img/bg.jpg);
+}
+
+@font-face {
+    font-family: CyberArena Cyrillic;
+    src: url(../fonts/15311.otf);
+}
+
+/* Блок для вывода статуса компьютеров */
+.CompStatus {
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    width: 1000px;
+    height: 1060px;
+}
+
+/* Блок для вывода прайса */
+.PriceBoard {
+    position: absolute;
+    top: 10px;
+    left: 1020px;
+    width: 880px;
+    height: 1060px;
+    background-color: rgba(12,3,5,0.8);
+    box-shadow: 6px 6px 8px rgba(0,0,0,0.4);
+}
+
+/* Блок для вывода статуса зоны Arena */
+.Arena {
+    margin-top: 0px;
+    width: 100%;
+    height: 150px;
+    background-color: rgba(12,3,5,0.8);
+    box-shadow: 6px 6px 8px rgba(0,0,0,0.4);
+}
+
+/* Блок для вывода статуса зоны Game */
+.Game {
+    margin-top: 0px;
+    width: 100%;
+    height: 460px;
+    background-color: rgba(12,3,5,0.8);
+    box-shadow: 6px 6px 8px rgba(0,0,0,0.4);
+}
+
+/* Блок для вывода статуса зоны CyberRoom */
+.CyberRoom {
+    margin-top: 0px;
+    width: 100%;
+    height: 150px;
+    background-color: rgba(12,3,5,0.8);
+    box-shadow: 6px 6px 8px rgba(0,0,0,0.4);
+}
+
+/* Блок для вывода статуса зоны Standart */
+.Standart {
+    margin-top: 0px;
+    width: 100%;
+    height: 150px;
+    background-color: rgba(12,3,5,0.8);
+    box-shadow: 6px 6px 8px rgba(0,0,0,0.4);
+}
+
+/* Блок для вывода статуса зоны PS4 */
+.PS4 {
+    margin-top: 0px;
+    float: left;
+    width: 50%;
+    height: 150px;
+    background-color: rgba(12,3,5,0.8);
+    box-shadow: 6px 6px 8px rgba(0,0,0,0.4);
+}
+
+/* Блок для вывода статуса зоны PS5 */
+.PS5 {
+    margin-top: 0px;
+    float: right;
+    width: 50%;
+    height: 150px;
+    background-color: rgba(12,3,5,0.8);
+    box-shadow: 6px 6px 8px rgba(0,0,0,0.4);
+}
+
+.Tabs {
+    width: 100%;
+    background-color: #0C0305;
+    box-shadow: 6px 6px 8px rgba(0,0,0,0.4);
+}
+
+.Tabs2 {
+    display: inline-block;
+    padding: 0px 55px 0px 30px;
+    font-family: CyberArena Cyrillic;
+    font-size: 36px;
+    letter-spacing: 2px;
+    color: #fff;
+    background: linear-gradient(-55deg, transparent 25px, #FC0820 0);
+}
+
+.PriceContent {
+    padding: 20px 20px 20px 20px;
+    font-size: 18px;
+    /* font-family: Bangers Cyrillic; */
+    color: #fff;
+}
+
+.BlockStatus {
+    display: inline-block;
+    width: 96px;
+    height: 75px;
+    background: url("../img/comp.png");
+    background-size: 96px 75px;
+    text-align: center;
+}
+
+.BlockStatusPS4 {
+    display: inline-block;
+    width: 96px;
+    height: 75px;
+    background: url("../img/comp.png");
+    background-size: 96px 75px;
+    text-align: center;
+}
+
+.BlockStatus h1 {
+    font-size: 40px;
+    margin-top: 5px;
+}
+
+.BlockStatus h2 {
+    font-size: 24px;
+}
+
+.BlockStatusPS4 h1 {
+    font-size: 40px;
+    margin-top: 5px;
+}
+
+.BlockStatusPS4 h2 {
+    font-size: 24px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    line-height: 1.1;
+    /*font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;*/
+}
+
+th {
+    border: 1px solid grey;
+    padding: 10px;
+    font-size: 26px;
+    /*color: #039;*/
+}
+
+td {
+    font-size: 24px;
+    border: 1px solid grey;
+    padding: 1px 1px 1px 10px;
+    /*color: #669;*/
+}
+
+tr:nth-child(2n) {
+    background: rgba(12,3,5,0.8);
+}
+
+.black {
+    background: rgba(12,3,5,0.8);
+}
