@@ -1,9 +1,10 @@
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using System.Net.Http.Headers;
+using System.Runtime.Loader;
 using System.Text;
 
-#region
+#region localhost/api/hosts
 HttpClient client = new HttpClient();
 var pass = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(
 System.Text.ASCIIEncoding.ASCII.GetBytes($"{"admin"}:{"admin"}")));
@@ -16,6 +17,36 @@ var responseContent = await response.Content.ReadAsStringAsync();
 
 var builder = WebApplication.CreateBuilder();
 var app = builder.Build();
+
+#region Query get request
+//Свойство QueryString позволяет получить строку запроса. Строка запроса представляет ту часть запрошенного адреса, которая идет после символа ? и представляет набор параметров, разделенных символом амперсанда &:
+//app.Run(async (context) =>
+//{
+//    context.Response.ContentType = "text/html; charset=utf-8";
+//    await context.Response.WriteAsync($"<p>Path: {context.Request.Path}</p>" +
+//        $"<p>QueryString: {context.Request.QueryString}</p>");
+//});
+//С помощью свойства Query можно получить все параметры строки запроса в виде словаря:
+//app.Run(async (context) =>
+//{
+//    context.Response.ContentType = "text/html; charset=utf-8";
+//    var stringBuilder = new System.Text.StringBuilder("<h3>Параметры строки запроса</h3><table>");
+//    stringBuilder.Append("<tr><td>Параметр</td><td>Значение</td></tr>");
+//    foreach (var param in context.Request.Query)
+//    {
+//        stringBuilder.Append($"<tr><td>{param.Key}</td><td>{param.Value}</td></tr>");
+//    }
+//    stringBuilder.Append("</table>");
+//    await context.Response.WriteAsync(stringBuilder.ToString());
+//});
+////Соответственно можно вытащить из словаря Query значения отдельных параметров:
+//app.Run(async (context) =>
+//{
+//    string name = context.Request.Query["name"];
+//    string age = context.Request.Query["age"];
+//    await context.Response.WriteAsync($"{name} - {age}");
+//});
+#endregion
 
 #region Image SendFileAsync testing downloading
 //app.Run(async (context) => await context.Response.WriteAsync($"Path: {context.Request.Path} "));
@@ -115,8 +146,124 @@ var app = builder.Build();
 #endregion
 
 #region IO with json
+//app.Run(async (context) =>
+//{
 
+//    var Armor = new Armor(80);
+//    var Orc = new Person("Adolf", "Hilter", Armor);
+//    var response = context.Response;
+//    await response.WriteAsJsonAsync<Person>(Orc);
+//});
+
+//Пример где я ввожу данные в в форме на странице ArmoredPersones.html и создаю класс, который потом отправляю в виде json
+//app.Run(async (context) =>
+//{
+//    context.Response.ContentType = "text/html; charset=utf-8";
+//    if (context.Request.Path == "/add_orc")
+//    {
+//        var form = context.Request.Form;
+//        var OrcName = form["Orc name"];
+//        var OrcHome = form["Orc home"];
+//        var ArmorName = form["Armor name"];
+//        var ArmorLvl = form["Armor LVL"];
+//        var Armor = new Armor(ArmorName, Convert.ToInt32(ArmorLvl));
+//        var Orc = new Person(OrcName, OrcHome, Armor);
+//        await context.Response.WriteAsJsonAsync<Person>(Orc);
+//    }
+//    else
+//    {
+//        await context.Response.SendFileAsync("html/ArmoredPersones.html");
+//    }
+//});
+
+//Пример где я ввожу строку запроса, парсю и создаю экземпляр класса Person, после чего отправляют обратно
+//app.Run(async(context) =>
+//{
+//    context.Response.ContentType = "text/html; charset=utf-8";
+//    if (context.Request.Path == "/add_orc_v2")
+//    {
+//        string? OrcName = "";
+//        string? OrcHome = "";
+//        string? ArmorName = "";
+//        int ArmorLvl = 0;
+//        if (context.Request.Query.Count > 0)
+//        {
+//            foreach (var query in context.Request.Query)
+//            {
+//                if (query.Key == "name")
+//                {
+//                    if (query.Value.ToString() is null or "")
+//                    {
+//                        var stringBuilder = new System.Text.StringBuilder("Значение name должно быть не пустым");
+//                        stringBuilder.Append("<tr></tr>");
+//                        await context.Response.WriteAsync(stringBuilder.ToString());
+//                        return;
+//                    }
+//                    else
+//                    {
+//                        OrcName = query.Value;
+//                    }
+//                }
+//                else if (query.Key == "home")
+//                {
+//                        OrcHome = query.Value;
+//                }
+//                else if (query.Key == "armorName")
+//                {
+//                    ArmorName = query.Value;
+//                }
+//                else if (query.Key == "armorLVL")
+//                {
+//                    ArmorLvl = Convert.ToInt32(query.Value);
+//                }
+//                else
+//                {
+//                    await context.Response.WriteAsync("Принимаются лишь параметры name home armorName armorLVL <br> ");
+//                }
+//            }
+//            var Armor = new Armor(ArmorName, Convert.ToInt32(ArmorLvl));
+//            var Orc = new Person(OrcName, OrcHome, Armor);
+//            await context.Response.WriteAsJsonAsync<Person>(Orc);
+//        }
+//        else
+//        {
+
+//            await context.Response.WriteAsync($"Вы должны ввести хотя бы имя орка и лвл брони<br>");
+//        }        
+//    }
+//    else
+//    {
+//        await context.Response.SendFileAsync("html/ArmoredPersonesV2.html");
+//    }
+//});
+
+app.Run(async (context) =>
+{
+    var response = context.Response;
+    var request = context.Request;
+    if (request.Path == "/api/user")
+    {
+        var message = "Некорректные данные";   // содержание сообщения по умолчанию
+        try
+        {
+            // пытаемся получить данные json
+            var person = await request.ReadFromJsonAsync<Golum>();
+            if (person != null) // если данные сконвертированы в Person
+                message = $"Name: {person.Name}  Age: {person.Age}";
+        }
+        catch { }
+        // отправляем пользователю данные
+        await response.WriteAsJsonAsync(new { text = message });
+    }
+    else
+    {
+        response.ContentType = "text/html; charset=utf-8";
+        await response.SendFileAsync("html/ReadJsonPerson.html");
+    }
+});
 #endregion
+
+
 
 app.Run(async (context) =>
 {
@@ -141,15 +288,34 @@ app.Run();
 #region SomeClasses
 public class Person
 {
-    public string Name { get; set; }
-    public string Address { get; set; }
-    Armor Person_armor { get; set; }
+    public string? Name { get; private set; }
+    public string? Address { get; private set; }
+    public Armor? Person_armor { get; set; }
     public Person(string name, string address)
     {
-        Name = name;
-        Address = address;
+        if (name == null || name == "")
+        {
+            name = "Adolf";
+        }
+        else
+        {
+            Name = name;
+        }
+        if (address == null || address == "")
+        {
+            address = "Durotar";
+        }
+        else
+        {
+            Address = address;
+        }
     }
-    public Person(Armor person_armor) : this (Name, Adress)
+    public Person(Armor person_armor) : this ("Alolf","Hitler")
+    {
+        Person_armor = person_armor;
+    }
+
+    public Person(string name, string address, Armor? person_armor) : this(name, address)
     {
         Person_armor = person_armor;
     }
@@ -162,10 +328,20 @@ public class Armor
     {
         get { return name; }
     }
-
+    public int Item_LVL
+    {
+        get { return item_LVL; }
+    }
     public Armor(string? name)
     {
-        this.name = name;
+        if (name is null or "")
+        {
+            name = "Armor";
+        }
+        else
+        {
+            this.name = name;
+        }
     }
     public Armor(int item_LVL) : this("Adolf")
     {
@@ -177,4 +353,6 @@ public class Armor
     }
 
 }
+
+public record Golum(string Name, int Age);
 #endregion
