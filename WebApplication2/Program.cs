@@ -1,8 +1,13 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging.Console;
+using System;
 using System.Net.Http.Headers;
 using System.Runtime.Loader;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 #region localhost/api/hosts
 HttpClient client = new HttpClient();
@@ -177,7 +182,7 @@ var app = builder.Build();
 //});
 
 //Пример где я ввожу строку запроса, парсю и создаю экземпляр класса Person, после чего отправляют обратно
-//app.Run(async(context) =>
+//app.Run(async (context) =>
 //{
 //    context.Response.ContentType = "text/html; charset=utf-8";
 //    if (context.Request.Path == "/add_orc_v2")
@@ -206,7 +211,7 @@ var app = builder.Build();
 //                }
 //                else if (query.Key == "home")
 //                {
-//                        OrcHome = query.Value;
+//                    OrcHome = query.Value;
 //                }
 //                else if (query.Key == "armorName")
 //                {
@@ -229,7 +234,7 @@ var app = builder.Build();
 //        {
 
 //            await context.Response.WriteAsync($"Вы должны ввести хотя бы имя орка и лвл брони<br>");
-//        }        
+//        }
 //    }
 //    else
 //    {
@@ -244,16 +249,26 @@ app.Run(async (context) =>
     if (request.Path == "/api/user")
     {
         var message = "Некорректные данные";   // содержание сообщения по умолчанию
-        try
-        {
-            // пытаемся получить данные json
-            var person = await request.ReadFromJsonAsync<Golum>();
-            if (person != null) // если данные сконвертированы в Person
-                message = $"Name: {person.Name}  Age: {person.Age}";
+        if (request.Method == "POST")
+        { 
+            try
+            {
+                //если в заголовке есть application/json
+                if (request.HasJsonContentType())
+                {
+                    var jsonConverterOptions = new JsonSerializerOptions();
+                    jsonConverterOptions.Converters.Add(new GolumConverter());
+                    // пытаемся получить данные json
+                    var person = await request.ReadFromJsonAsync<Golum>(jsonConverterOptions);
+                    if (person != null) // если данные сконвертированы в Person
+                        message = $"Name: {person.Name}  Age: {person.Age}";
+                }
+            }
+            catch { }
         }
-        catch { }
         // отправляем пользователю данные
         await response.WriteAsJsonAsync(new { text = message });
+
     }
     else
     {
@@ -270,7 +285,6 @@ app.Run(async (context) =>
     var path = context.Request.Path;
     var fullPath = $"html/{path}";
     var response = context.Response;
-
     response.ContentType = "text/html; charset=utf-8";
     if (File.Exists(fullPath))
     {
@@ -355,4 +369,51 @@ public class Armor
 }
 
 public record Golum(string Name, int Age);
+public class GolumConverter : JsonConverter<Golum>
+{
+    public override Golum? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        var personName = "Undefined";
+        var personAge = 0;
+        while (reader.Read())
+        {
+            if (reader.TokenType == JsonTokenType.PropertyName)
+            {
+                var propertyName = reader.GetString();
+                reader.Read();
+                switch (propertyName?.ToLower())
+                {
+                    // если свойство age и оно содержит число
+                    case "age" when reader.TokenType == JsonTokenType.Number:
+                        personAge = reader.GetInt32();  // считываем число из json
+                        break;
+                    // если свойство age и оно содержит строку
+                    case "age" when reader.TokenType == JsonTokenType.String:
+                        string? stringValue = reader.GetString();
+                        // пытаемся конвертировать строку в число
+                        if (int.TryParse(stringValue, out int value))
+                        {
+                            personAge = value;
+                        }
+                        break;
+                    case "name":    // если свойство Name/name
+                        string? name = reader.GetString();
+                        if (name != null)
+                            personName = name;
+                        break;
+                }
+            }
+        }
+        return new Golum(personName, personAge);
+    }
+
+    public override void Write(Utf8JsonWriter writer, Golum value, JsonSerializerOptions options)
+    {
+        writer.WriteStartObject();
+        writer.WriteString("name", value.Name);
+        writer.WriteNumber("age", value.Age);
+
+        writer.WriteEndObject();
+    }
+}
 #endregion
